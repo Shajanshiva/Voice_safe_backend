@@ -26,7 +26,7 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 def get_current_user_profile(db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     user = db.query(User).filter(User.user_id == current_user).first()
     return user
-    
+
 
 @router.post("/", response_model=UserResponse)
 def create_user(user: UserBase, db: Session = Depends(get_db)):
@@ -43,7 +43,6 @@ def create_user(user: UserBase, db: Session = Depends(get_db)):
 
 @router.put("/{user_id}")
 def update_user(user_id: int, detail: UserUpdate, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    # Only allow users to update their own profile
     if user_id != current_user:
         raise HTTPException(status_code=403, detail="Not authorized to update this profile")
         
@@ -52,7 +51,6 @@ def update_user(user_id: int, detail: UserUpdate, db: Session = Depends(get_db),
         valid_user.full_name = detail.full_name
         valid_user.email = detail.email
         
-        # Only update password if provided
         if detail.password and detail.password.strip():
             valid_user.password = hash_password(detail.password)
             
